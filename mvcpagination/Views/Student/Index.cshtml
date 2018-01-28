@@ -1,0 +1,100 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div id="tableGrid">
+    @Html.Partial("paging");
+</div>
+
+<script type="text/javascript"> 
+
+    jQuery(document).ready(function () {
+
+        $("[data-toggle=tooltip]").tooltip();
+
+        var currentOrderByColumn = "";
+
+        jQuery(document).on("click", "th.header-column", function () {
+            var self = $(this);
+            var column = "";
+            var isSortingSupportedForColumn = false;
+
+            if ($(this).find("i").hasClass('fa-sort')) {
+                currentOrderByColumn = jQuery(this).attr("id") + "_" + "Asc";
+                isSortingSupportedForColumn = true;
+            }
+            if ($(this).find("i").hasClass('fa-sort-asc')) {
+                currentOrderByColumn = jQuery(this).attr("id") + "_" + "Desc";
+                isSortingSupportedForColumn = true;
+            }
+            if ($(this).find("i").hasClass('fa-sort-desc')) {
+                currentOrderByColumn = "";
+                isSortingSupportedForColumn = true;
+            }
+
+            if(isSortingSupportedForColumn){
+                jQuery.ajax({
+                    type: "POST",
+                    url: "/Student/getTable",
+                    data: { "OrderBy": currentOrderByColumn, SearchBy: jQuery("#filter").val(), currentPage: parseInt(jQuery(this).attr("pagenumber")), pageSize: parseInt(jQuery("#SelectPageSize").children('option:selected').val()) },
+                    "content-type": "application/json;charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                        jQuery("#tableGrid").html("").html(data.data);
+                        $("[data-toggle=tooltip]").tooltip();
+                    }
+                });
+            }
+        });
+
+        jQuery(document).on("click", "li.currentPage", function () {
+            if ($(this).hasClass("disabled")) {
+                event.preventDefault();
+                return false;
+            }
+
+            jQuery.ajax({
+                type: "POST",
+                url: "/Student/getTable",
+                data: { "OrderBy": currentOrderByColumn, SearchBy: jQuery("#filter").val(), currentPage: parseInt(jQuery(this).attr("pagenumber")), pageSize: parseInt(jQuery("#SelectPageSize").children('option:selected').val()) },
+                "content-type": "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                   jQuery("#tableGrid").html("").html(data.data);
+                   $("[data-toggle=tooltip]").tooltip();
+
+                }
+            });
+        });
+
+        jQuery(document).on("change", "#filter", function () {
+            jQuery.ajax({
+                type: "POST",
+                url: "/Student/getTable",
+                data: { "OrderBy": '', SearchBy: jQuery(this).val(), currentPage: '', pageSize: '' },
+                "content-type": "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    jQuery("#tableGrid").html("").html(data.data);
+                    $("[data-toggle=tooltip]").tooltip();
+
+                }
+            });
+        });
+
+        jQuery(document).on("change", "#SelectPageSize", function () {
+            jQuery.ajax({
+                type: "POST",
+                url: "/Student/getTable",
+                data: { "OrderBy": currentOrderByColumn, SearchBy: jQuery("#filter").val(), currentPage: '', pageSize: parseInt(jQuery(this).children('option:selected').val()) },
+                "content-type": "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    jQuery("#tableGrid").html("").html(data.data);
+                    $("[data-toggle=tooltip]").tooltip();
+                }
+            });
+        });
+    });
+
+</script>
