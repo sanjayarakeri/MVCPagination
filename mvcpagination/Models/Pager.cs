@@ -19,6 +19,7 @@ namespace mvcpagination.Models
         public int endIndex { get; set; }
         public int pages { get; set; }
 
+        #region GetPager
         public Pager GetPager(int totalItems, int? currentPage, int? pageSize)
         {
             // default to first page
@@ -73,7 +74,9 @@ namespace mvcpagination.Models
 
             return this;
         }
+        #endregion
 
+        #region CreateHtmlFilterSearchBlock
         public static StringBuilder CreateHtmlFilterSearchBlock(StringBuilder htmlBuilder, string SearchBy, int pageSize)
         {
             int[] pageSizeOptions = { 5, 10, 25, 50, 100 };
@@ -112,7 +115,9 @@ namespace mvcpagination.Models
 
             return htmlBuilder;
         }
+        #endregion
 
+        #region CreateHtmlTableStartBlock
         public static StringBuilder CreateHtmlTableStartBlock(StringBuilder htmlBuilder)
         {
             htmlBuilder.Append("<div class='table-responsive'>");
@@ -120,7 +125,9 @@ namespace mvcpagination.Models
 
             return htmlBuilder;
         }
+        #endregion
 
+        #region CreateHtmlTableHeaderBlock
         public static StringBuilder CreateHtmlTableHeaderBlock(StringBuilder htmlBuilder, Dictionary<string, string> headerTextAndIDs, string OrderBy,bool isEditDeleteSuppported=true)
         {
             htmlBuilder.Append("<thead>");
@@ -163,7 +170,10 @@ namespace mvcpagination.Models
 
             return htmlBuilder;
         }
+        #endregion
 
+
+        #region CreateHtmlTableBodyFromList
         public static StringBuilder CreateHtmlTableBodyFromList(StringBuilder htmlBuilder, List<object> listOfObjects, Dictionary<string, string> headerTextAndIDs,bool isEditDeleteSuppported=true)
         {
             htmlBuilder.Append("<tbody>");
@@ -186,7 +196,9 @@ namespace mvcpagination.Models
             htmlBuilder.Append("</tbody>");
             return htmlBuilder;
         }
+        #endregion
 
+        #region CreateHtmlTableEndBlock
         public static StringBuilder CreateHtmlTableEndBlock(StringBuilder htmlBuilder)
         {
             htmlBuilder.Append("</table>");
@@ -194,7 +206,9 @@ namespace mvcpagination.Models
 
             return htmlBuilder;
         }
+        #endregion
 
+        #region CreateHtmlPagerLinksBlock
         public static StringBuilder CreateHtmlPagerLinksBlock(StringBuilder htmlBuilder, Pager pagerSettings)
         {
             htmlBuilder.Append("<div class='row bg-success'>");
@@ -257,6 +271,7 @@ namespace mvcpagination.Models
 
             return htmlBuilder;
         }
+        #endregion
 
     }
 }
