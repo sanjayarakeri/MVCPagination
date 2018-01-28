@@ -15,22 +15,18 @@ namespace mvcpagination.Controllers
 
     public class StudentController : Controller
     {
-        public JsonResult getTable(string OrderBy, string SearchBy, int? currentPage,int? pageSize)
+        public JsonResult getTable(string OrderBy, string SearchBy, int? currentPage, int? pageSize)
         {
-            Dictionary<string, string> headerTextAndIDs = new Dictionary<string, string>();
-            headerTextAndIDs.Add("CustomerID", "Customer ID");
-            headerTextAndIDs.Add("EmployeeID", "Employee ID");
-            headerTextAndIDs.Add("ShipName", "Ship Name");
-            headerTextAndIDs.Add("ShipAddress", "Ship Address");
+            List<HtmlTableSettings> headerTextAndIDs = new List<HtmlTableSettings>();
+            headerTextAndIDs.Add(new HtmlTableSettings() { columnName = "CustomerID", columnText = "Customer ID", isColumnSupportSorting = true });
+            headerTextAndIDs.Add(new HtmlTableSettings() { columnName = "EmployeeID", columnText = "Employee ID", isColumnSupportSorting = false });
+            headerTextAndIDs.Add(new HtmlTableSettings() { columnName = "ShipName", columnText = "Ship Name", isColumnSupportSorting = true });
+            headerTextAndIDs.Add(new HtmlTableSettings() { columnName = "ShipAddress", columnText = "Ship Address", isColumnSupportSorting = true });
 
             NORTHWNDEntities context = new NORTHWNDEntities();
-            int totalRecords = 0;
-            Pager pagerSettings = null;
-            bool IsOrderByAppliedOnAnyColumn = false;
-            
 
             var customerList = (from customer in context.Orders
-                               select customer).ToList();
+                                select customer).ToList();
 
             if (!string.IsNullOrEmpty(SearchBy))
             {
@@ -40,8 +36,6 @@ namespace mvcpagination.Controllers
 
             if (!string.IsNullOrEmpty(OrderBy))
             {
-                IsOrderByAppliedOnAnyColumn = true;
-
                 switch (OrderBy)
                 {
                     case "CustomerID_Asc":
@@ -78,69 +72,27 @@ namespace mvcpagination.Controllers
                 }
             }
 
+            StringBuilder htmlBuilder = Pager.CreateHtmlTableWithPagination(headerTextAndIDs, customerList.ToList<object>(), OrderBy, SearchBy, true, currentPage, pageSize);
 
-            totalRecords = customerList.Count();
-            pagerSettings = new Pager().GetPager(totalRecords, currentPage,pageSize);
-            if (IsOrderByAppliedOnAnyColumn == false)
-            {
-                customerList = customerList.Skip(pagerSettings.startIndex).Take(pagerSettings.pageSize).ToList();
-            }
-            else
-            {
-                customerList = customerList.Skip(pagerSettings.startIndex).Take(pagerSettings.pageSize).ToList();
-            }
-
-            StringBuilder htmlBuilder = new StringBuilder();
-
-            htmlBuilder = Pager.CreateHtmlFilterSearchBlock(htmlBuilder, SearchBy,pagerSettings.pageSize);
-
-            htmlBuilder = Pager.CreateHtmlTableStartBlock(htmlBuilder);
-
-            htmlBuilder = Pager.CreateHtmlTableHeaderBlock(htmlBuilder, headerTextAndIDs,OrderBy);
-
-            htmlBuilder = Pager.CreateHtmlTableBodyFromList(htmlBuilder, customerList.ToList<object>(), headerTextAndIDs,true);
-
-            htmlBuilder = Pager.CreateHtmlTableEndBlock(htmlBuilder);
-
-            htmlBuilder = Pager.CreateHtmlPagerLinksBlock(htmlBuilder, pagerSettings);
-
-
-            return Json(new { data = htmlBuilder.ToString()} ,JsonRequestBehavior.AllowGet);
+            return Json(new { data = htmlBuilder.ToString() }, JsonRequestBehavior.AllowGet);
         }
 
         // GET: Student
         [HttpGet]
         public ActionResult Index(string OrderBy, string SearchBy, int? currentPage, int? pageSize)
         {
-            Dictionary<string, string> headerTextAndIDs = new Dictionary<string, string>();
-            headerTextAndIDs.Add("CustomerID", "Customer ID");
-            headerTextAndIDs.Add("EmployeeID", "Employee ID");
-            headerTextAndIDs.Add("ShipName", "Ship Name");
-            headerTextAndIDs.Add("ShipAddress", "Ship Address");
+            List<HtmlTableSettings> headerTextAndIDs = new List<HtmlTableSettings>();
+            headerTextAndIDs.Add(new HtmlTableSettings() { columnName = "CustomerID", columnText = "Customer ID", isColumnSupportSorting = true });
+            headerTextAndIDs.Add(new HtmlTableSettings() { columnName = "EmployeeID", columnText = "Employee ID", isColumnSupportSorting = false });
+            headerTextAndIDs.Add(new HtmlTableSettings() { columnName = "ShipName", columnText = "Ship Name", isColumnSupportSorting = true });
+            headerTextAndIDs.Add(new HtmlTableSettings() { columnName = "ShipAddress", columnText = "Ship Address", isColumnSupportSorting = true });
 
             NORTHWNDEntities context = new NORTHWNDEntities();
             List<Order> customerList = null;
-            int totalRecords = 0;
-            Pager pagerSettings = null;
 
             customerList = context.Orders.ToList();
-            totalRecords = customerList.Count();
-            pagerSettings = new Pager().GetPager(totalRecords, currentPage,pageSize);
-            customerList = customerList.Skip(pagerSettings.startIndex).Take(pagerSettings.pageSize).ToList();
 
-            StringBuilder htmlBuilder = new StringBuilder();
-
-            htmlBuilder = Pager.CreateHtmlFilterSearchBlock(htmlBuilder, SearchBy,pagerSettings.pageSize);
-
-            htmlBuilder = Pager.CreateHtmlTableStartBlock(htmlBuilder);
-
-            htmlBuilder = Pager.CreateHtmlTableHeaderBlock(htmlBuilder, headerTextAndIDs,OrderBy);
-
-            htmlBuilder = Pager.CreateHtmlTableBodyFromList(htmlBuilder, customerList.ToList<object>(), headerTextAndIDs,true);
-
-            htmlBuilder = Pager.CreateHtmlTableEndBlock(htmlBuilder);
-
-            htmlBuilder = Pager.CreateHtmlPagerLinksBlock(htmlBuilder, pagerSettings);
+            StringBuilder htmlBuilder = Pager.CreateHtmlTableWithPagination(headerTextAndIDs, customerList.ToList<object>(), OrderBy, SearchBy, true, currentPage, pageSize);
 
             ViewBag.HtmlStr = htmlBuilder.ToString();
 

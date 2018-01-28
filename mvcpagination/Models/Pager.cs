@@ -128,35 +128,52 @@ namespace mvcpagination.Models
         #endregion
 
         #region CreateHtmlTableHeaderBlock
-        public static StringBuilder CreateHtmlTableHeaderBlock(StringBuilder htmlBuilder, Dictionary<string, string> headerTextAndIDs, string OrderBy,bool isEditDeleteSuppported=true)
+        public static StringBuilder CreateHtmlTableHeaderBlock(StringBuilder htmlBuilder, List<HtmlTableSettings> headerTextAndIDs, string OrderBy, bool isEditDeleteSuppported = true)
         {
             htmlBuilder.Append("<thead>");
             htmlBuilder.Append("<tr>");
 
-            foreach (KeyValuePair<string, string> item in headerTextAndIDs)
+            foreach (var item in headerTextAndIDs)
             {
                 if (string.IsNullOrEmpty(OrderBy))
                 {
-                    htmlBuilder.Append("<th class='header-column' id=" + item.Key + ">" + item.Value + "<i class='fa fa-sort pull-right'></i></th>");
-                }
-                else
-                {
-                    if (item.Key == OrderBy.Split('_')[0])
+                    if (item.isColumnSupportSorting)
                     {
-                        if (OrderBy.Split('_')[1] == "Asc")
-                        {
-                            htmlBuilder.Append("<th class='header-column' id=" + item.Key + ">" + item.Value + "<i class='fa fa-sort-asc pull-right'></i></th>");
-                        }
-                        else if (OrderBy.Split('_')[1] == "Desc")
-                        {
-                            htmlBuilder.Append("<th class='header-column' id=" + item.Key + ">" + item.Value + "<i class='fa fa-sort-desc pull-right'></i></th>");
-                        }
+                        htmlBuilder.Append("<th class='header-column' id=" + item.columnName + ">" + item.columnText + "<i class='fa fa-sort pull-right'></i></th>");
                     }
                     else
                     {
-                        htmlBuilder.Append("<th class='header-column' id=" + item.Key + ">" + item.Value + "<i class='fa fa-sort pull-right'></i></th>");
+                        htmlBuilder.Append("<th class='header-column' id=" + item.columnName + ">" + item.columnText + "<i class=''></i></th>");
                     }
-                }                
+                }
+                else
+                {
+                    if (OrderBy.Split('_').Count() == 2)
+                    {
+                        if (item.columnName.Equals(OrderBy.Split('_')[0]))
+                        {
+                            if (OrderBy.Split('_')[1].Equals("Asc"))
+                            {
+                                htmlBuilder.Append("<th class='header-column' id=" + item.columnName + ">" + item.columnText + "<i class='fa fa-sort-asc pull-right'></i></th>");
+                            }
+                            else if (OrderBy.Split('_')[1].Equals("Desc"))
+                            {
+                                htmlBuilder.Append("<th class='header-column' id=" + item.columnName + ">" + item.columnText + "<i class='fa fa-sort-desc pull-right'></i></th>");
+                            }
+                        }
+                        else
+                        {
+                            if (item.isColumnSupportSorting)
+                            {
+                                htmlBuilder.Append("<th class='header-column' id=" + item.columnName + ">" + item.columnText + "<i class='fa fa-sort pull-right'></i></th>");
+                            }
+                            else
+                            {
+                                htmlBuilder.Append("<th class='header-column' id=" + item.columnName + ">" + item.columnText + "<i class=''></i></th>");
+                            }
+                        }
+                    }
+                }
             }
 
             if (isEditDeleteSuppported)
@@ -172,9 +189,8 @@ namespace mvcpagination.Models
         }
         #endregion
 
-
         #region CreateHtmlTableBodyFromList
-        public static StringBuilder CreateHtmlTableBodyFromList(StringBuilder htmlBuilder, List<object> listOfObjects, Dictionary<string, string> headerTextAndIDs,bool isEditDeleteSuppported=true)
+        public static StringBuilder CreateHtmlTableBodyFromList(StringBuilder htmlBuilder, List<object> listOfObjects, List<HtmlTableSettings> headerTextAndIDs, bool isEditDeleteSuppported = true)
         {
             htmlBuilder.Append("<tbody>");
             foreach (var item in listOfObjects)
@@ -184,7 +200,10 @@ namespace mvcpagination.Models
                 htmlBuilder.Append("<tr>");
                 foreach (var currentColumn in headerTextAndIDs)
                 {
-                    htmlBuilder.Append("<td>" + currentItem[currentColumn.Key] + "</td>");                    
+                    if (currentItem.ContainsKey(currentColumn.columnName))
+                    {
+                        htmlBuilder.Append("<td>" + currentItem[currentColumn.columnName] + "</td>");
+                    }
                 }
                 if (isEditDeleteSuppported)
                 {
@@ -228,7 +247,7 @@ namespace mvcpagination.Models
 
             htmlBuilder.Append("<div class='col-md-10'>");
             htmlBuilder.Append("<ul class='pagination pull-right'>");
-            if (pagerSettings.startPage == 1)
+            if (pagerSettings.currentPage == 1)
             {
                 htmlBuilder.Append("<li class='disabled currentPage' pagenumber='" + 1 + "'><a>First</a></li>");
                 htmlBuilder.Append("<li class='disabled currentPage' pagenumber='" + (pagerSettings.currentPage - 1) + "'><a >Previous</a></li>");
@@ -273,5 +292,38 @@ namespace mvcpagination.Models
         }
         #endregion
 
+
+        #region CreateHtmlTableWithPagination
+        public static StringBuilder CreateHtmlTableWithPagination(List<HtmlTableSettings> headerTextAndIDs, List<object> listOfObjects,string OrderBy,string SearchBy,bool isEditDeleteSuppported,int? currentPage,int? pageSize)
+        {
+            StringBuilder htmlBuilder = new StringBuilder();
+
+            Pager pagerSettings = new Pager().GetPager(listOfObjects.Count(), currentPage, pageSize);
+            listOfObjects = listOfObjects.Skip(pagerSettings.startIndex).Take(pagerSettings.pageSize).ToList();
+
+            htmlBuilder = Pager.CreateHtmlFilterSearchBlock(htmlBuilder, SearchBy, pagerSettings.pageSize);
+
+            htmlBuilder = Pager.CreateHtmlTableStartBlock(htmlBuilder);
+
+            htmlBuilder = Pager.CreateHtmlTableHeaderBlock(htmlBuilder, headerTextAndIDs, OrderBy);
+
+            htmlBuilder = Pager.CreateHtmlTableBodyFromList(htmlBuilder, listOfObjects, headerTextAndIDs, true);
+
+            htmlBuilder = Pager.CreateHtmlTableEndBlock(htmlBuilder);
+
+            htmlBuilder = Pager.CreateHtmlPagerLinksBlock(htmlBuilder, pagerSettings);
+
+
+            return htmlBuilder;
+        }
+        #endregion
+
+    }
+
+    public class HtmlTableSettings
+    {
+        public string columnName { get; set; }
+        public string columnText { get; set; }
+        public bool isColumnSupportSorting { get; set; }
     }
 }
