@@ -18,6 +18,7 @@ namespace mvcpagination.Models
         public int startIndex { get; set; }
         public int endIndex { get; set; }
         public int pages { get; set; }
+        static int[] pageSizeOptions = { 5, 10, 25, 50, 100 };
 
         #region GetPager
         public Pager GetPager(int totalItems, int? currentPage, int? pageSize)
@@ -77,42 +78,51 @@ namespace mvcpagination.Models
         #endregion
 
         #region CreateHtmlFilterSearchBlock
-        public static StringBuilder CreateHtmlFilterSearchBlock(StringBuilder htmlBuilder, string SearchBy, int pageSize)
+        public static StringBuilder CreateHtmlFilterSearchBlock(StringBuilder htmlBuilder, string SearchBy, int pageSize,bool showPageLengthBlock=true,bool showSearchBlock=false)
         {
-            int[] pageSizeOptions = { 5, 10, 25, 50, 100 };
 
-            htmlBuilder.Append("<div class='row'>");
-
-            htmlBuilder.Append("<div class='col-md-6 bg-success'>");
-            htmlBuilder.Append("<div class='form-group'>");
-            htmlBuilder.Append("<label class='control-label'> Show : </label>");
-            htmlBuilder.Append("<select id='SelectPageSize' class='form-control'>");
-
-            foreach (var currentPageSize in pageSizeOptions)
+            if (showPageLengthBlock || showSearchBlock)
             {
-                if (currentPageSize == pageSize)
+                htmlBuilder.Append("<div class='row bg-success'>");
+
+                if (showPageLengthBlock)
                 {
-                    htmlBuilder.Append("<option value=" + currentPageSize + " selected>" + currentPageSize + "</option>");
+                    htmlBuilder.Append("<div class='col-md-6'>");
+                    htmlBuilder.Append("<div class='form-group'>");
+                    htmlBuilder.Append("<label class='control-label'> Show : </label>");
+                    htmlBuilder.Append("<select id='SelectPageSize' class='form-control'>");
+
+                    foreach (var currentPageSize in pageSizeOptions)
+                    {
+                        if (currentPageSize == pageSize)
+                        {
+                            htmlBuilder.Append("<option value=" + currentPageSize + " selected>" + currentPageSize + "</option>");
+                        }
+                        else
+                        {
+                            htmlBuilder.Append("<option value=" + currentPageSize + ">" + currentPageSize + "</option>");
+                        }
+                    }
+
+                    htmlBuilder.Append("</select>");
+                    htmlBuilder.Append("</div>");
+                    htmlBuilder.Append("</div>");
                 }
-                else
+
+                if (showSearchBlock)
                 {
-                    htmlBuilder.Append("<option value=" + currentPageSize + ">" + currentPageSize + "</option>");
+
+                    htmlBuilder.Append("<div class='col-md-6 pull-right'>");
+                    htmlBuilder.Append("<div class='form-group pull-right'>");
+                    htmlBuilder.Append("<label class='control-label'>Search : </label>");
+                    htmlBuilder.Append("<input type='text' id='filter' value='" + SearchBy + "' class='form-control' />");
+                    htmlBuilder.Append("</div>");
+                    htmlBuilder.Append("</div>");
                 }
+
+                htmlBuilder.Append("</div>");
+
             }
-
-            htmlBuilder.Append("</select>");
-            htmlBuilder.Append("</div>");
-            htmlBuilder.Append("</div>");
-
-            htmlBuilder.Append("<div class='col-md-6 bg-success'>");
-            htmlBuilder.Append("<div class='form-group pull-right'>");
-            htmlBuilder.Append("<label class='control-label'>Search : </label>");
-            htmlBuilder.Append("<input type='text' id='filter' value='" + SearchBy + "' class='form-control' />");
-            htmlBuilder.Append("</div>");
-            htmlBuilder.Append("</div>");
-
-            htmlBuilder.Append("</div>");
-
             return htmlBuilder;
         }
         #endregion
@@ -291,7 +301,6 @@ namespace mvcpagination.Models
             return htmlBuilder;
         }
         #endregion
-
 
         #region CreateHtmlTableWithPagination
         public static StringBuilder CreateHtmlTableWithPagination(List<HtmlTableSettings> headerTextAndIDs, List<object> listOfObjects,string OrderBy,string SearchBy,bool isEditDeleteSuppported,int? currentPage,int? pageSize)

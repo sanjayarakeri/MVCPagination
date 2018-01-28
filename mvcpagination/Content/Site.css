@@ -18,7 +18,7 @@ textarea {
 
 /* Table Vertical Scroll */
 
-/*table {
+table {
     display: table;
     width: 100%;
 }
@@ -51,4 +51,4 @@ table tr {
 .table th {
     white-space: pre-wrap;
     width: 1%;
-}*/
+}
