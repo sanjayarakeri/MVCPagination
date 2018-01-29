@@ -24,9 +24,10 @@ namespace mvcpagination.Controllers
             headerTextAndIDs.Add(new HtmlTableSettings() { columnName = "ShipAddress", columnText = "Ship Address", isColumnSupportSorting = true });
 
             NORTHWNDEntities context = new NORTHWNDEntities();
+            context.Configuration.ProxyCreationEnabled = false;
 
             var customerList = (from customer in context.Orders
-                                select customer).ToList();
+                                select customer).Include("Customers").ToList();
 
             if (!string.IsNullOrEmpty(SearchBy))
             {
@@ -72,7 +73,7 @@ namespace mvcpagination.Controllers
                 }
             }
 
-            StringBuilder htmlBuilder = Pager.CreateHtmlTableWithPagination(headerTextAndIDs, customerList.ToList<object>(), OrderBy, SearchBy, true, currentPage, pageSize);
+            StringBuilder htmlBuilder = Pager.CreateHtmlTableWithPagination(headerTextAndIDs, customerList.ToList<object>(), OrderBy, SearchBy, true, currentPage, pageSize,true,true);
 
             return Json(new { data = htmlBuilder.ToString() }, JsonRequestBehavior.AllowGet);
         }
@@ -88,11 +89,12 @@ namespace mvcpagination.Controllers
             headerTextAndIDs.Add(new HtmlTableSettings() { columnName = "ShipAddress", columnText = "Ship Address", isColumnSupportSorting = true });
 
             NORTHWNDEntities context = new NORTHWNDEntities();
+            context.Configuration.ProxyCreationEnabled = false;
             List<Order> customerList = null;
 
-            customerList = context.Orders.ToList();
+            customerList = context.Orders.Include("Customer").ToList();
 
-            StringBuilder htmlBuilder = Pager.CreateHtmlTableWithPagination(headerTextAndIDs, customerList.ToList<object>(), OrderBy, SearchBy, true, currentPage, pageSize);
+            StringBuilder htmlBuilder = Pager.CreateHtmlTableWithPagination(headerTextAndIDs, customerList.ToList<object>(), OrderBy, SearchBy, true, currentPage, pageSize,true,true);
 
             ViewBag.HtmlStr = htmlBuilder.ToString();
 

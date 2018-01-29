@@ -98,3 +98,5 @@ F:\GitHub\MVCPagination\mvcpagination\bin\System.Web.Mvc.xml
 F:\GitHub\MVCPagination\mvcpagination\obj\Debug\mvcpagination.csprojResolveAssemblyReference.cache
 F:\GitHub\MVCPagination\mvcpagination\obj\Debug\mvcpagination.dll
 F:\GitHub\MVCPagination\mvcpagination\obj\Debug\mvcpagination.pdb
+F:\GitHub\MVCPagination\mvcpagination\bin\Newtonsoft.Json.dll
+F:\GitHub\MVCPagination\mvcpagination\bin\Newtonsoft.Json.xml

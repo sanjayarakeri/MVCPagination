@@ -4,6 +4,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Web;
+using System.Web.Script.Serialization;
+using System.Xml;
 
 namespace mvcpagination.Models
 {
@@ -78,12 +80,12 @@ namespace mvcpagination.Models
         #endregion
 
         #region CreateHtmlFilterSearchBlock
-        public static StringBuilder CreateHtmlFilterSearchBlock(StringBuilder htmlBuilder, string SearchBy, int pageSize,bool showPageLengthBlock=true,bool showSearchBlock=false)
+        public static StringBuilder CreateHtmlFilterSearchBlock(StringBuilder htmlBuilder, string SearchBy, int pageSize,bool showPageLengthBlock,bool showSearchBlock)
         {
 
             if (showPageLengthBlock || showSearchBlock)
             {
-                htmlBuilder.Append("<div class='row bg-success'>");
+                htmlBuilder.Append("<div class='row bg-light'>");
 
                 if (showPageLengthBlock)
                 {
@@ -138,7 +140,7 @@ namespace mvcpagination.Models
         #endregion
 
         #region CreateHtmlTableHeaderBlock
-        public static StringBuilder CreateHtmlTableHeaderBlock(StringBuilder htmlBuilder, List<HtmlTableSettings> headerTextAndIDs, string OrderBy, bool isEditDeleteSuppported = true)
+        public static StringBuilder CreateHtmlTableHeaderBlock(StringBuilder htmlBuilder, List<HtmlTableSettings> headerTextAndIDs, string OrderBy, bool isEditDeleteSuppported)
         {
             htmlBuilder.Append("<thead>");
             htmlBuilder.Append("<tr>");
@@ -200,7 +202,7 @@ namespace mvcpagination.Models
         #endregion
 
         #region CreateHtmlTableBodyFromList
-        public static StringBuilder CreateHtmlTableBodyFromList(StringBuilder htmlBuilder, List<object> listOfObjects, List<HtmlTableSettings> headerTextAndIDs, bool isEditDeleteSuppported = true)
+        public static StringBuilder CreateHtmlTableBodyFromList(StringBuilder htmlBuilder, List<object> listOfObjects, List<HtmlTableSettings> headerTextAndIDs, bool isEditDeleteSuppported)
         {
             htmlBuilder.Append("<tbody>");
             foreach (var item in listOfObjects)
@@ -217,7 +219,7 @@ namespace mvcpagination.Models
                 }
                 if (isEditDeleteSuppported)
                 {
-                    htmlBuilder.Append("<td><p data-placement='top' data-toggle='tooltip' title='Edit'><button class='btn btn-primary btn-xs' data-title='Edit' data-toggle='modal' data-target='#edit' ><span class='glyphicon glyphicon-pencil'></span></button></p></td>");
+                    htmlBuilder.Append("<td RowData='" + new JavaScriptSerializer().Serialize(currentItem) + "'><p data-placement='top' data-toggle='tooltip' title='Edit'><button  class='btn btn-primary btn-xs' data-title='Edit' data-toggle='modal' data-target='#edit' ><span class='glyphicon glyphicon-pencil'></span></button></p></td>");
                     htmlBuilder.Append("<td><p data-placement='top' data-toggle='tooltip' title='Delete'><button class='btn btn-danger btn-xs' data-title='Delete' data-toggle='modal' data-target='#delete' ><span class='glyphicon glyphicon-trash'></span></button></p></td>");
                 }
                 htmlBuilder.Append("</tr>");
@@ -240,7 +242,7 @@ namespace mvcpagination.Models
         #region CreateHtmlPagerLinksBlock
         public static StringBuilder CreateHtmlPagerLinksBlock(StringBuilder htmlBuilder, Pager pagerSettings)
         {
-            htmlBuilder.Append("<div class='row bg-success'>");
+            htmlBuilder.Append("<div class='row bg-light'>");
 
             htmlBuilder.Append("<div class='col-md-2'>");
             htmlBuilder.Append("<ul class='text-secondary bg-light text-dark text-center pagination'>");
@@ -259,8 +261,8 @@ namespace mvcpagination.Models
             htmlBuilder.Append("<ul class='pagination pull-right'>");
             if (pagerSettings.currentPage == 1)
             {
-                htmlBuilder.Append("<li class='disabled currentPage' pagenumber='" + 1 + "'><a>First</a></li>");
-                htmlBuilder.Append("<li class='disabled currentPage' pagenumber='" + (pagerSettings.currentPage - 1) + "'><a >Previous</a></li>");
+                htmlBuilder.Append("<li class='disabled currentPage'><a>First</a></li>");
+                htmlBuilder.Append("<li class='disabled currentPage'><a >Previous</a></li>");
             }
             else
             {
@@ -284,10 +286,10 @@ namespace mvcpagination.Models
             }
 
 
-            if (pagerSettings.totalPages == pagerSettings.endPage)
+            if (pagerSettings.currentPage == pagerSettings.endPage)
             {
-                htmlBuilder.Append("<li class='disabled currentPage'  pagenumber='" + (pagerSettings.currentPage + 1) + "'><a>Next</a></li>");
-                htmlBuilder.Append("<li class='disabled currentPage'  pagenumber='" + (pagerSettings.totalPages) + "'><a>Last</a></li>");
+                htmlBuilder.Append("<li class='disabled currentPage'><a>Next</a></li>");
+                htmlBuilder.Append("<li class='disabled currentPage'><a>Last</a></li>");
             }
             else
             {
@@ -303,18 +305,18 @@ namespace mvcpagination.Models
         #endregion
 
         #region CreateHtmlTableWithPagination
-        public static StringBuilder CreateHtmlTableWithPagination(List<HtmlTableSettings> headerTextAndIDs, List<object> listOfObjects,string OrderBy,string SearchBy,bool isEditDeleteSuppported,int? currentPage,int? pageSize)
+        public static StringBuilder CreateHtmlTableWithPagination(List<HtmlTableSettings> headerTextAndIDs, List<object> listOfObjects,string OrderBy,string SearchBy,bool isEditDeleteSuppported,int? currentPage,int? pageSize, bool showPageLengthBlock, bool showSearchBlock)
         {
             StringBuilder htmlBuilder = new StringBuilder();
 
             Pager pagerSettings = new Pager().GetPager(listOfObjects.Count(), currentPage, pageSize);
             listOfObjects = listOfObjects.Skip(pagerSettings.startIndex).Take(pagerSettings.pageSize).ToList();
 
-            htmlBuilder = Pager.CreateHtmlFilterSearchBlock(htmlBuilder, SearchBy, pagerSettings.pageSize);
+            htmlBuilder = Pager.CreateHtmlFilterSearchBlock(htmlBuilder, SearchBy, pagerSettings.pageSize,showPageLengthBlock,showSearchBlock);
 
             htmlBuilder = Pager.CreateHtmlTableStartBlock(htmlBuilder);
 
-            htmlBuilder = Pager.CreateHtmlTableHeaderBlock(htmlBuilder, headerTextAndIDs, OrderBy);
+            htmlBuilder = Pager.CreateHtmlTableHeaderBlock(htmlBuilder, headerTextAndIDs, OrderBy,isEditDeleteSuppported);
 
             htmlBuilder = Pager.CreateHtmlTableBodyFromList(htmlBuilder, listOfObjects, headerTextAndIDs, true);
 
